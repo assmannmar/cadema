@@ -1,21 +1,4 @@
 <body>
   <h1>Hola, Marti — estoy funcionando 😎</h1>
   <script src="script.js"></script>
-
-
-<script>
-async function loadProperties() {
-  try {
-    const res = await fetch('/api/propiedades');
-    const data = await res.json();
-    console.log(data);
-  } catch (e) {
-    console.error('Error:', e);
-  }
-}
-
-loadProperties();
-</script>
 </body>
-
-
