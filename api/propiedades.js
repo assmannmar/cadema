@@ -1,14 +1,39 @@
-// api/propiedades.js (VERSIÓN DEBUG)
+// api/propiedades.js
 export default async function handler(req, res) {
+  if (req.method === 'OPTIONS') {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    return res.status(204).end();
+  }
+
   try {
-    const url = `https://tokkobroker.com/api/v1/property/?key=${process.env.TOKKO_API_KEY}&format=json&page=1`;
-    const r = await fetch(url);
-    const data = await r.json();
+    let page = 1;
+    let acumulado = [];
+    let seguir = true;
 
-    console.log("TOKKO RESPUESTA:", data);  // LOG IMPORTANTE
+    while (seguir) {
+      const url = `https://tokkobroker.com/api/v1/property/?key=${process.env.TOKKO_API_KEY}&format=json&page=${page}`;
 
-    res.status(200).json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.toString() });
+      const r = await fetch(url);
+      const data = await r.json();
+
+      const objetos = data.objects || [];
+
+      if (!Array.isArray(objetos) || objetos.length === 0) {
+        seguir = false;
+        break;
+      }
+
+      acumulado = [...acumulado, ...objetos];
+      page++;
+    }
+
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.status(200).json(acumulado);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Error al conectar con Tokko' });
   }
 }
